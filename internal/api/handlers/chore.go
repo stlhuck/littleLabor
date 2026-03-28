@@ -17,6 +17,13 @@ func NewChoreHandler(repo *db.ChoreRepository) *ChoreHandler {
 	return &ChoreHandler{repo: repo}
 }
 
+type CreateChoreRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Frequency   string `json:"frequency" binding:"required"`
+	PointsValue int    `json:"points_value" binding:"required"`
+}
+
 // List returns all chores
 func (h *ChoreHandler) List(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -36,4 +43,33 @@ func (h *ChoreHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"chores": chores})
+}
+
+// Create creates a new chore
+func (h *ChoreHandler) Create(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req CreateChoreRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" || req.Description == "" || req.Frequency == "" || req.PointsValue == 0 {
+		http.Error(w, "Missing required fields: name, description, frequency, points_value", http.StatusBadRequest)
+		return
+	}
+
+	chore, err := h.repo.CreateChore(r.Context(), req.Name, req.Description, req.Frequency, req.PointsValue)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(chore)
 }
