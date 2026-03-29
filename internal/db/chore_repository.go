@@ -43,6 +43,20 @@ func (r *ChoreRepository) CreateChore(ctx context.Context, name, description, fr
 	return &chore, nil
 }
 
+// DeleteChore deletes a chore
+func (r *ChoreRepository) DeleteChore(ctx context.Context, name string) error {
+	const query = `
+	DELETE FROM chores WHERE name = $1
+	`
+
+	_, err := r.conn.Exec(ctx, query, name)
+	if err != nil {
+		return fmt.Errorf("failed to delete chore: %w", err)
+	}
+
+	return nil
+}
+
 // GetChoreByID retrieves a chore by ID
 func (r *ChoreRepository) GetChoreByID(ctx context.Context, id int) (*Chore, error) {
 	const query = `

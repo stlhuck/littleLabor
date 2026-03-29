@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -14,7 +13,6 @@ import (
 )
 
 func main() {
-	fmt.Println("just doing a test")
 	// Initialize database connection
 	dbConfig := db.Config{
 		Host:     getEnv("DB_HOST", "localhost"),

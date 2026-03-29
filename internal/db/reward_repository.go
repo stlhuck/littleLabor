@@ -42,6 +42,20 @@ func (r *RewardRepository) CreateReward(ctx context.Context, name, description s
 	return &reward, nil
 }
 
+// DeleteReward deletes a chore
+func (r *RewardRepository) DeleteReward(ctx context.Context, name string) error {
+	const query = `
+	DELETE FROM rewards WHERE name = $1
+	`
+
+	_, err := r.conn.Exec(ctx, query, name)
+	if err != nil {
+		return fmt.Errorf("failed to delete reward: %w", err)
+	}
+
+	return nil
+}
+
 // GetRewardByID retrieves a reward by ID
 func (r *RewardRepository) GetRewardByID(ctx context.Context, id int) (*Reward, error) {
 	const query = `

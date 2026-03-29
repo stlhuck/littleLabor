@@ -42,6 +42,20 @@ func (r *UserRepository) CreateUser(ctx context.Context, username, email, passwo
 	return &user, nil
 }
 
+// DeleteUser deletes a user from the database
+func (r *UserRepository) DeleteUser(ctx context.Context, username string) error {
+	const query = `
+		DELETE FROM users WHERE username = $1
+	`
+	
+	_, err := r.conn.Exec(ctx, query, username)
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+	
+	return nil
+}
+
 // GetUserByID retrieves a user by ID
 func (r *UserRepository) GetUserByID(ctx context.Context, id int) (*User, error) {
 	const query = `

@@ -24,6 +24,11 @@ type CreateUserRequest struct {
 	PasswordHash string `json:"password_hash" binding:"required"`
 }
 
+// DeleteUserRequest represents the JSON payload for deleting a user
+type DeleteUserRequest struct {
+	Username string `json:"username" binding:"required"`
+}
+
 // List returns all users
 func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -72,4 +77,33 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
+}
+
+// Delete deletes a user
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req DeleteUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Username == "" {
+		http.Error(w, "Missing required fields: username", http.StatusBadRequest)
+		return
+	}
+
+	err := h.repo.DeleteUser(r.Context(), req.Username)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
+
 }
