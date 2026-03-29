@@ -24,6 +24,10 @@ type CreateChoreRequest struct {
 	PointsValue int    `json:"points_value" binding:"required"`
 }
 
+type DeleteChoreRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
 // List returns all chores
 func (h *ChoreHandler) List(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -72,4 +76,33 @@ func (h *ChoreHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(chore)
+}
+
+// Delete deletes a chore
+func (h *ChoreHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req DeleteChoreRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" {
+		http.Error(w, "Missing required fields: name", http.StatusBadRequest)
+		return
+	}
+
+	err := h.repo.DeleteChore(r.Context(), req.Name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
+
 }

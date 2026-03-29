@@ -50,27 +50,39 @@ func (r *Router) handleHealth(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) handleUsers(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
+	switch req.Method {
+	case http.MethodGet:
 		r.userHandler.List(w, req)
-	} else if req.Method == http.MethodPost {
+	case http.MethodPost:
 		r.userHandler.Create(w, req)
-	} else {
+	case http.MethodDelete:
+		r.userHandler.Delete(w, req)
+	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
-
 func (r *Router) handleChores(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
+	switch req.Method {
+	case http.MethodGet:
 		r.choreHandler.List(w, req)
-	} else {
+	case http.MethodPost:
+		r.choreHandler.Create(w, req)
+	case http.MethodDelete:
+		r.choreHandler.Delete(w, req)
+	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
 func (r *Router) handleRewards(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
+	switch req.Method {
+	case http.MethodGet:
 		r.rewardHandler.List(w, req)
-	} else {
+	case http.MethodPost:
+		r.rewardHandler.Create(w, req)
+	case http.MethodDelete:
+		r.rewardHandler.Delete(w, req)
+	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
